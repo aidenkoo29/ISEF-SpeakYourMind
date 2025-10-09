@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital AAC</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="top-section">
+            <div id="selected-cards-container">
+                <div class="selected-cards-wrapper">
+                    <h3>내가 고른 대화 카드</h3>
+                    <div class="controls">
+                        <button id="reset-btn" type="button">리셋</button>
+                        <button id="suggestion-btn" type="button">
+                            카드 추천받기
+                            <span class="spinner" id="suggestion-spinner" style="display: none;"></span>
+                        </button>
+                    </div>
+                </div>
+                <div id="selected-cards"></div>
+            </div>
+
+            <div id="suggested-cards-container">
+                <h3>추천 카드</h3>
+                <div id="suggested-cards"></div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="tabs">
+                <button class="tab-btn active" data-category="all">전체</button>
+                <button class="tab-btn" data-category="favorite">즐겨찾기</button>
+            </div>
+            <div id="card-container"></div>
+        </div>
+    </div>
+
+    
+    <button id="add-card-btn" class="floating-btn add-card-btn" title="카드 추가하기"></button>
+    <button id="record-btn" class="floating-btn record-btn" title="녹음 시작"></button>
+
+    <div id="augmented-popup" class="popup-overlay" style="display: none;">
+        <div class="popup-content">
+            <span class="close-btn">&times;</span>
+            <h3>새로 추가된 카드</h3>
+            <div id="augmented-cards-popup-container"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
