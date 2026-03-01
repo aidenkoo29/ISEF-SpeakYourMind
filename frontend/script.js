@@ -40,13 +40,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedCards = [];
 
     // Fetch and parse CSV data
-    fetch('aac_library.csv')
+    fetch('../data/aac_library.csv')
         .then(response => response.text())
         .then(data => {
             const rows = data.trim().split('\n').slice(1);
             aacData = rows.map(row => {
                 const [category, word] = row.split(',');
-                return { category, word, image: `aac_images/${category}/${word}.png` };
+                return { category, word, image: `../aac_images/${category}/${word}.png` };
             });
             renderTabs();
             renderCards('All');
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function createCard(item) {
         const card = document.createElement('div');
         card.className = 'card';
-        card.innerHTML = `<img src="${item.image}" alt="${item.word}"><p>${item.word}</p>`;
+        card.innerHTML = `<img src="${normalizeAssetPath(item.image)}" alt="${item.word}"><p>${item.word}</p>`;
         return card;
     }
 
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playAudio(item) {
-        const audio = new Audio(`aac_audios/${item.category}/${item.word}.mp3`);
+        const audio = new Audio(`../aac_audios/${item.category}/${item.word}.mp3`);
         audio.play();
     }
 
@@ -107,8 +107,31 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('오디오 경로가 없습니다.', 'error');
             return;
         }
-        const audio = new Audio(url);
+        const audio = new Audio(normalizeAssetPath(url));
         audio.play();
+    }
+
+    function normalizeAssetPath(path) {
+        if (!path) return path;
+        if (
+            path.startsWith('http://') ||
+            path.startsWith('https://') ||
+            path.startsWith('data:') ||
+            path.startsWith('blob:') ||
+            path.startsWith('../') ||
+            path.startsWith('/')
+        ) {
+            return path;
+        }
+        if (path.startsWith('aac_images/') || path.startsWith('aac_audios/')) {
+            return `../${path}`;
+        }
+        return path;
+    }
+
+    function stripFrontendPrefix(path) {
+        if (!path) return path;
+        return path.startsWith('../') ? path.slice(3) : path;
     }
 
     function removeFromSelected(index) {
@@ -282,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ].filter(Boolean);
 
             communityDetailBody.innerHTML = `
-                ${card.image ? `<img src="${card.image}" alt="${card.name || ''}">` : ''}
+                ${card.image ? `<img src="${normalizeAssetPath(card.image)}" alt="${card.name || ''}">` : ''}
                 <p>카테고리: ${card.category || ''}</p>
                 ${tags ? `<p>태그: ${tags}</p>` : ''}
                 ${contextLines.map(line => `<p>${line}</p>`).join('')}
@@ -315,7 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 aacData.push({
                     category: copied.category,
                     word: copied.word,
-                    image: copied.image || `aac_images/${copied.category}/${copied.word}.png`
+                    image: normalizeAssetPath(copied.image) || `../aac_images/${copied.category}/${copied.word}.png`
                 });
                 renderTabs();
                 const activeCategory = document.querySelector('.tab-btn.active')?.dataset.category || 'All';
@@ -373,8 +396,8 @@ document.addEventListener('DOMContentLoaded', () => {
             context_time: shareTimeInput.value.trim(),
             context_place: sharePlaceInput.value.trim(),
             context_occasion: shareOccasionInput.value.trim(),
-            image: card.image || `aac_images/${card.category}/${card.word}.png`,
-            audio: `aac_audios/${card.category}/${card.word}.mp3`
+            image: stripFrontendPrefix(card.image || `../aac_images/${card.category}/${card.word}.png`),
+            audio: stripFrontendPrefix(`../aac_audios/${card.category}/${card.word}.mp3`)
         };
 
         try {
@@ -516,9 +539,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     button.textContent = '완료';
                     statusEl.textContent = '완료';
 
-                    const card = result.card || { ...item, image: `aac_images/${item.category}/${item.word}.png` };
+                    const card = result.card || { ...item, image: `../aac_images/${item.category}/${item.word}.png` };
                     if (!aacData.some(c => c.category === card.category && c.word === card.word)) {
-                        aacData.push({ ...card, image: `aac_images/${card.category}/${card.word}.png` });
+                        aacData.push({ ...card, image: `../aac_images/${card.category}/${card.word}.png` });
                         renderTabs();
                         renderCards(document.querySelector('.tab-btn.active').dataset.category);
                     }

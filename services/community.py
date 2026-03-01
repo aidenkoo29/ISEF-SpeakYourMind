@@ -6,9 +6,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
-from config import AAC_AUDIOS_DIR, AAC_IMAGES_DIR, AAC_LIBRARY_PATH
+import os
 
-COMMUNITY_LIBRARY_PATH = Path("community_library.json")
+from config import AAC_AUDIOS_DIR, AAC_IMAGES_DIR, AAC_LIBRARY_PATH, DATA_DIR
+
+COMMUNITY_LIBRARY_PATH = Path(os.getenv("COMMUNITY_LIBRARY_PATH", DATA_DIR / "community_library.json"))
 
 
 def _load_library() -> List[Dict[str, Any]]:

@@ -177,4 +177,3 @@ No changes have been made to `script.js` for community feature yet.
 Tell Codex:
 
 “Finish the community feature by wiring the new UI in `script.js` to the `/community/*` endpoints. Use the existing HTML elements and add open/close behavior, search, detail view, and share flow. After copy, update `aacData` and re-render.”
-
