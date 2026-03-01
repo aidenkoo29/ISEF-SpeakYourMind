@@ -91,6 +91,18 @@ body {
     background-image: url('./assets/mic.png');
 }
 
+.community-btn {
+    bottom: 255px;
+    background-color: #111;
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.community-btn::after {
+    content: 'COMM';
+}
+
 .record-btn:hover {
     transform: scale(1.1);
 }
@@ -238,6 +250,202 @@ body {
 
 #reset-btn:hover {
     background-color: #d32f2f;
+}
+
+.popup-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+.popup-content {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    width: min(800px, 92vw);
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.popup-header button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.community-search {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.community-search input {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.community-search button {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: none;
+    background: #007bff;
+    color: #fff;
+}
+
+.community-results {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.community-card {
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.community-card button {
+    border: none;
+    padding: 6px 10px;
+    background: #4CAF50;
+    color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.community-detail-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.share-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.share-form input,
+.share-form select {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.share-form button {
+    margin-top: 8px;
+    padding: 10px 12px;
+    border: none;
+    background: #4CAF50;
+    color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.suggestion-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.suggestion-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+}
+
+.suggestion-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.suggestion-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.suggestion-actions button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.suggestion-actions button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.toast-container {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 4000;
+}
+
+.toast {
+    background: #333;
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    animation: toastIn 0.2s ease-out;
+}
+
+.toast.success {
+    background: #2e7d32;
+}
+
+.toast.error {
+    background: #c62828;
+}
+
+@keyframes toastIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .loading-spinner {

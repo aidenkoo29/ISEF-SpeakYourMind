@@ -7,7 +7,11 @@ from openai import OpenAI
 import requests
 from pathlib import Path
 
-client = OpenAI(api_key=YOUR_API_KEY) 
+from dotenv import load_dotenv
+
+load_dotenv()
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def get_context(user_aac_selections, counterpart_utterance):
     completion = client.chat.completions.create(
@@ -258,4 +262,3 @@ for tab, category in zip(tabs, categories):
         for i, row in category_df.iterrows():
             with cols[i % 5]:
                 card(row['category'], row['word'], key_prefix='library')
-

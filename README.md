@@ -1,52 +1,84 @@
 # SpeakYourMind
-- 제작: 구준한, 임채원
 
-## 🧩 문제제기
+AI-powered AAC (Augmentative and Alternative Communication) web app that recommends conversation cards based on context inferred from prior selections and recorded speech.
 
-무발화 자폐인은 의사소통의 어려움을 겪습니다.
-유일한 해결책인 AAC(Augmentative and Alternative Communication) 보조도구들은 표현의 다양성이 부족하거나 사용의 불편함으로 상황에 맞는 대화를 자유로이 하기 어렵습니다.
+## Structure Overview
+The project is a simple full-stack app with:
+- Backend: `FastAPI` in `server.py` (exported via `app.py`) for suggestions, augmentation, and audio upload/transcription.
+- Frontend: static `index.html`, `script.js`, `style.css` rendering AAC cards and calling backend APIs.
+- Data/Assets: CSV-based AAC library plus image/audio assets for each card.
 
----
+## Project Layout
+Key files and folders:
+- `app.py`: Thin entrypoint that exports the FastAPI app from `server.py`.
+- `server.py`: FastAPI server. Wires routes and global state.
+- `config.py`: Centralized config for paths and environment variables.
+- `services/`: Backend modules (embeddings, suggestion, augmentation, audio, OpenAI client).
+- `main.py`: Streamlit prototype UI (separate from the HTML/JS frontend). Appears to be an earlier experiment or alternative UI.
+- `index.html`: Web UI layout (selected cards, suggestions, tabs, popup).
+- `script.js`: Frontend logic (load library, render cards, selection state, API calls, audio recording).
+- `style.css`: Styling for the web UI.
+- `aac_library.csv`: Current AAC card list in `category,word` format.
+- `original_aac_library.csv`: Baseline library used to reset on shutdown.
+- `library_vectors.pkl`: Cached FastText vectors for `aac_library.csv`.
+- `aac_images/`: PNG images per card grouped by category.
+- `aac_audios/`: MP3 audio per card grouped by category.
+- `uploads/`: Temporary user audio (`speech.mp3`).
+- `model/cc.ko.300.bin`: FastText Korean model file.
 
-## 💡 SpeakYourMind
+## Runtime Flow
+End-to-end flow for the HTML/JS frontend:
+1. `script.js` loads `aac_library.csv` and renders cards.
+2. User selects cards, which are POSTed to `/update-selection`.
+3. User records speech; audio is uploaded to `/upload-audio`.
+4. Backend transcribes audio (Whisper) and updates `conversation_history`.
+5. Clicking “카드 추천받기” calls `/suggest-cards`:
+   - LLM infers context and suggests words.
+   - Words are expanded to similar AAC cards using FastText + cosine similarity.
+6. Clicking “카드 추가하기” calls `/augment-cards`:
+   - LLM proposes missing words.
+   - Images and audio are generated and appended to `aac_library.csv`.
 
-**SpeakYourMind**는 대화 맥락 인식하여, 사용자가 말하고자 하는 의도를 예측하고
-관련된 대화 카드를 추천해주는 **AI기반 AAC 앱**입니다.
+## Backend Components
+- Embedding: `fasttext` vectors (cached to `library_vectors.pkl`).
+- Suggestion logic: `services/suggestion.py` uses an LLM + similarity search to pick AAC cards.
+- Augmentation logic: `services/augmentation.py` generates new card candidates, images, and audio.
+- API (`server.py`):
+  - `POST /update-selection`
+  - `POST /upload-audio`
+  - `GET /suggest-cards`
+  - `POST /augment-cards`
 
-* 사용자는 개인화된 **대화 카드**를 사용해 대화를 진행합니다.
-* 비장애인의 음성 대화를 녹음하여 대화 맥락에 더욱 적합한 대화 카드를 추천할 수 있습니다.
-* 매 대화마다 AI를 통하여 상황에 적절한 대화 카드를 추천받습니다.
-* AI는 향후 필요할 법한 대화 카드를 파악하여 이미지심볼/음성오디오와 함께 새로운 카드를 생성합니다.
+## Frontend Components
+- `index.html` defines containers for selections, suggestions, and category tabs.
+- `script.js` handles:
+  - CSV load and rendering
+  - selection state
+  - API calls
+  - audio recording
+- `style.css` defines layout and visuals.
 
----
+## Next Refactor Steps
+Recommended follow-ups now that the core refactor is in place:
+- Replace global mutable state (`current_aac_selection`, `conversation_history`) with per-session storage or a database.
+- Add a build step for frontend assets and consider a lightweight framework or component system.
+- Add tests:
+  - Unit tests for suggestion/augmentation logic
+  - Integration tests for API endpoints
+- Add async task queue (e.g., Celery/RQ) for image/audio generation.
+- Introduce model abstraction to switch between FastText/OpenAI embedding methods cleanly.
 
-## ⚙️ 사용법 (Usage)
+## Development Notes
+- Install deps:
+  ```bash
+  pip install fastapi uvicorn openai fasttext pandas numpy scikit-learn soundfile pillow python-multipart python-dotenv
+  ```
+- Start server:
+  ```bash
+  uvicorn app:app --reload
+  ```
+- Open UI: `index.html` in a browser.
+- `main.py` is an alternate Streamlit app and is not used by the HTML/JS frontend.
 
-1. **모델 및 OpenAI API key 준비**
-   `model/cc.ko.300.bin` 파일을 준비합니다.
-   (FastText 한국어 임베딩 모델을 사용합니다.) 또한 OpenAI API Key를 준비하여 `app.py`에 등록해줍니다.
-
-2. **서버 실행**
-   ```bash
-   uvicorn app:app --reload
-   ```
-
-3. **앱 실행**
-   브라우저에서 `index.html` 파일을 열어 실행합니다.
-
----
-
-### (Optional)
-
-* 초기 카드 라이브러리를 커스텀할 수 있습니다. 커스텀을 원하시는 경우
-  `original_aac_library.csv` 파일을 수정하세요.
-  (카테고리와 단어를 추가하면 자동으로 UI에 반영됩니다.)
-
----
-
-## 👩‍💻 개발환경
-
-* Python 3.10+
-* FastText (cc.ko.300.bin)
-* Frontend: HTML, CSS, JavaScript
-* Backend: FastAPI
+## Security Notes
+- Do not commit API keys. Load them from environment variables or a local `.env` file.
