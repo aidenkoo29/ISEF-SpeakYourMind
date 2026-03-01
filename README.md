@@ -1,3 +1,5 @@
+Kor version
+
 # SpeakYourMind
 
 AI-powered AAC (Augmentative and Alternative Communication) web app that recommends conversation cards based on context inferred from prior selections and recorded speech.
