@@ -35,7 +35,7 @@ def suggestion_logic(conversation_history, library: pd.DataFrame, top_k: int = 8
                     "- context_time: a full sentence describing the current time context (e.g., 'It seems to be around lunchtime.')\n"
                     "- context_place: a full sentence describing where the conversation likely takes place (e.g., 'They are probably at home.')\n"
                     "- context_occasion: a sentence describing the social or functional occasion (e.g., 'They are getting ready to eat a meal.')\n"
-                    f"- suggestion: a list of 5 Korean AAC words from {library['word']} the user might want to say next, based on the conversation.\n\n"
+                    f"- suggestion: a list of 5 AAC words from {library['word']} the user might want to say next, based on the conversation.\n\n"
                     "Be thoughtful and concise."
                 ),
             },

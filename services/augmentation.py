@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import csv
+import re
 import time
 from io import BytesIO
 from pathlib import Path
@@ -26,12 +27,18 @@ CATEGORY_ALIASES = {
     "질문": "Questions",
     "시간": "Time",
 }
+ENGLISH_WORD_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9\s\-']*$")
 
 
 class AACAugmentation(BaseModel):
     context_summary: str
     missing_words: List[str]
     missing_from_library: List[bool]
+
+
+def is_english_word(text: str) -> bool:
+    candidate = (text or "").strip()
+    return bool(candidate and ENGLISH_WORD_RE.match(candidate))
 
 
 def generate_image(target_word: str, filename: Path) -> None:
@@ -103,6 +110,9 @@ def suggest_missing_words(conversation_history, aac_library_df: pd.DataFrame, mi
             if c not in VALID_CATEGORIES:
                 print(f"Invalid category '{c}' for word '{w}'. Skipping.")
                 continue
+            if not is_english_word(w):
+                print(f"Invalid non-English word '{w}'. Skipping.")
+                continue
             if ((aac_library_df["category"] == c) & (aac_library_df["word"] == w)).any():
                 print(f"Word '{w}' in category '{c}' already exists. Skipping.")
                 continue
@@ -125,6 +135,9 @@ def augmentation_logic(conversation_history, aac_library_df: pd.DataFrame):
                 c, w = word_pair.split("-")
                 c = CATEGORY_ALIASES.get(c, c)
                 if c in VALID_CATEGORIES:
+                    if not is_english_word(w):
+                        print(f"Invalid non-English word '{w}'. Skipping.")
+                        continue
                     if not ((aac_library_df["category"] == c) & (aac_library_df["word"] == w)).any():
                         image_path = AAC_IMAGES_DIR / c / f"{w}.png"
                         audio_path = AAC_AUDIOS_DIR / c / f"{w}.mp3"

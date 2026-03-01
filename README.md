@@ -24,7 +24,7 @@ Key files and folders:
 - `aac_images/`: PNG images per card grouped by category.
 - `aac_audios/`: MP3 audio per card grouped by category.
 - `uploads/`: Temporary user audio (`speech.mp3`).
-- `model/cc.ko.300.bin`: FastText Korean model file.
+- `model/cc.ko.300.bin`: FastText model file (legacy Korean-trained embedding asset).
 
 ## Runtime Flow
 End-to-end flow for the HTML/JS frontend:

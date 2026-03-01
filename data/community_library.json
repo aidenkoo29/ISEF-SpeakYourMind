@@ -1,32 +1,32 @@
 [
   {
     "id": "a287f9c5-dd68-4e30-a0db-139172a16475",
-    "name": "햄버거",
-    "category": "음식",
+    "name": "Hamburger",
+    "category": "Food",
     "tags": [
-      "음식"
+      "Food"
     ],
-    "context_time": "저녁",
-    "context_place": "식장",
-    "context_occasion": "식사",
-    "image": "aac_images/음식/햄버거.png",
-    "audio": "aac_audios/음식/햄버거.mp3",
+    "context_time": "Evening",
+    "context_place": "Restaurant",
+    "context_occasion": "Meal",
+    "image": "aac_images/Food/Hamburger.png",
+    "audio": "aac_audios/Food/Hamburger.mp3",
     "creator_id": "",
     "visibility": "public",
     "created_at": null
   },
   {
     "id": "df212e46-20fb-4a71-b4aa-c5ad8338a3ad",
-    "name": "컴퓨터",
-    "category": "물건",
+    "name": "Computer",
+    "category": "Objects",
     "tags": [
-      "물건"
+      "Objects"
     ],
-    "context_time": "아침",
-    "context_place": "학원",
-    "context_occasion": "레슨",
-    "image": "aac_images/물건/컴퓨터.png",
-    "audio": "aac_audios/물건/컴퓨터.mp3",
+    "context_time": "Morning",
+    "context_place": "Academy",
+    "context_occasion": "Lesson",
+    "image": "aac_images/Objects/Computer.png",
+    "audio": "aac_audios/Objects/Computer.mp3",
     "creator_id": "",
     "visibility": "public",
     "created_at": null

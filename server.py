@@ -20,7 +20,13 @@ from config import (
     UPLOAD_DIR,
 )
 from services.audio import create_audio, transcript
-from services.augmentation import generate_image, suggest_missing_words
+from services.augmentation import (
+    CATEGORY_ALIASES,
+    VALID_CATEGORIES,
+    generate_image,
+    is_english_word,
+    suggest_missing_words,
+)
 from services.embeddings import load_library, rebuild_library_vectors
 from services.suggestion import suggestion_logic
 from services.community import copy_to_library, get_card, search_cards, share_card
@@ -64,6 +70,13 @@ class CommunityShareRequest(BaseModel):
 
 class CommunityCopyRequest(BaseModel):
     id: str
+
+
+def _is_english_or_empty(text: str) -> bool:
+    cleaned = (text or "").strip()
+    if not cleaned:
+        return True
+    return is_english_word(cleaned)
 
 
 app.add_middleware(
@@ -183,9 +196,17 @@ def _generate_card_task(job_id: str, category: str, word: str):
 
 @app.post("/generate-card")
 async def generate_card(req: GenerateCardRequest, background_tasks: BackgroundTasks):
+    normalized_category = CATEGORY_ALIASES.get(req.category, req.category)
+    normalized_word = req.word.strip()
+
+    if normalized_category not in VALID_CATEGORIES:
+        return {"error": "invalid_category"}
+    if not is_english_word(normalized_word):
+        return {"error": "invalid_word"}
+
     job_id = str(uuid4())
-    generation_jobs[job_id] = {"status": "pending", "card": {"category": req.category, "word": req.word}}
-    background_tasks.add_task(_generate_card_task, job_id, req.category, req.word)
+    generation_jobs[job_id] = {"status": "pending", "card": {"category": normalized_category, "word": normalized_word}}
+    background_tasks.add_task(_generate_card_task, job_id, normalized_category, normalized_word)
     return {"job_id": job_id}
 
 
@@ -199,7 +220,26 @@ async def job_status(job_id: str):
 
 @app.post("/community/share")
 async def community_share(req: CommunityShareRequest):
-    card = share_card(req.dict())
+    normalized_category = CATEGORY_ALIASES.get(req.category, req.category)
+    normalized_name = req.name.strip()
+
+    if normalized_category not in VALID_CATEGORIES:
+        return {"error": "invalid_category"}
+    if not is_english_word(normalized_name):
+        return {"error": "invalid_name"}
+    if not all(_is_english_or_empty(tag) for tag in req.tags):
+        return {"error": "invalid_tags"}
+    if not _is_english_or_empty(req.context_time):
+        return {"error": "invalid_context_time"}
+    if not _is_english_or_empty(req.context_place):
+        return {"error": "invalid_context_place"}
+    if not _is_english_or_empty(req.context_occasion):
+        return {"error": "invalid_context_occasion"}
+
+    payload = req.dict()
+    payload["category"] = normalized_category
+    payload["name"] = normalized_name
+    card = share_card(payload)
     return {"card": card}
 
 

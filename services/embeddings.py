@@ -9,21 +9,28 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 
-from config import AAC_LIBRARY_PATH, EMBEDDING_PKL_PATH, MODEL_PATH
+from config import AAC_LIBRARY_PATH, EMBEDDING_PKL_PATH, MODEL_PATH, OPENAI_API_KEY
 from services.openai_client import get_client
 
 EmbeddingModel = Literal["fasttext", "openai"]
+DEFAULT_EMBEDDING_MODEL: EmbeddingModel = os.getenv(
+    "EMBEDDING_MODEL",
+    "openai" if OPENAI_API_KEY else "fasttext",
+)
 
 _fasttext_model = fasttext.load_model(str(MODEL_PATH))
 
 
-def get_embedding(text: str, model: EmbeddingModel = "fasttext", openai_model: str = "text-embedding-3-small"):
+def get_embedding(
+    text: str,
+    model: EmbeddingModel = DEFAULT_EMBEDDING_MODEL,
+    openai_model: str = "text-embedding-3-small",
+):
     if model == "fasttext":
         return _fasttext_model.get_word_vector(text)
     if model == "openai":
         client = get_client()
         text = text.replace("\n", " ")
-        text = f'"{text}" \ub77c\ub294 \ub9d0\uc744 \ud558\uace0 \uc2f6\uc5b4\uc694.'
         return client.embeddings.create(input=[text], model=openai_model).data[0].embedding
     raise ValueError(f"Unknown embedding model: {model}")
 
