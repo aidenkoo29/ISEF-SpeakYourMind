@@ -32,10 +32,10 @@ End-to-end flow for the HTML/JS frontend:
 2. User selects cards, which are POSTed to `/update-selection`.
 3. User records speech; audio is uploaded to `/upload-audio`.
 4. Backend transcribes audio (Whisper) and updates `conversation_history`.
-5. Clicking “카드 추천받기” calls `/suggest-cards`:
+5. Clicking "Card Suggestion" calls `/suggest-cards`:
    - LLM infers context and suggests words.
    - Words are expanded to similar AAC cards using FastText + cosine similarity.
-6. Clicking “카드 추가하기” calls `/augment-cards`:
+6. Clicking "Card Augmentation" calls `/augment-cards`:
    - LLM proposes missing words.
    - Images and audio are generated and appended to `aac_library.csv`.
 

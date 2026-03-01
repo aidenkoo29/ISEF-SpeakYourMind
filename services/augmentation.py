@@ -15,7 +15,17 @@ from config import AAC_AUDIOS_DIR, AAC_IMAGES_DIR, AAC_LIBRARY_PATH
 from services.audio import create_audio
 from services.openai_client import get_client
 
-VALID_CATEGORIES = ["사람", "감정", "음식", "장소", "행동", "물건", "질문", "시간"]
+VALID_CATEGORIES = ["People", "Feelings", "Food", "Places", "Actions", "Objects", "Questions", "Time"]
+CATEGORY_ALIASES = {
+    "사람": "People",
+    "감정": "Feelings",
+    "음식": "Food",
+    "장소": "Places",
+    "행동": "Actions",
+    "물건": "Objects",
+    "질문": "Questions",
+    "시간": "Time",
+}
 
 
 class AACAugmentation(BaseModel):
@@ -53,7 +63,7 @@ def _request_missing_words(conversation_history, aac_library_df: pd.DataFrame, m
                     "Given a conversation history between a nonverbal AAC user and a counterpart, and a list of available AAC cards "
                     "in 'category-word' format, extract:\n"
                     "1. A sentence summarizing the time/place/occasion of the conversation.\n"
-                    "2. A list of important Korean words or short phrases that were likely needed but do not exist in the AAC library, in 'category-word' format.\n\n"
+                    "2. A list of important English words or short phrases that were likely needed but do not exist in the AAC library, in 'category-word' format.\n\n"
                     "Think step-by-step about what the user tried to express and what vocabulary was needed, then check what's missing.\n\n"
                     f"Valid categories are: {VALID_CATEGORIES}. Avoid duplicates or similar words already in the AAC library. "
                     f"Only include words that are important and missing from aac_library. "
@@ -89,6 +99,7 @@ def suggest_missing_words(conversation_history, aac_library_df: pd.DataFrame, mi
             except ValueError:
                 print(f"Invalid format for missing word '{word_pair}'. Skipping.")
                 continue
+            c = CATEGORY_ALIASES.get(c, c)
             if c not in VALID_CATEGORIES:
                 print(f"Invalid category '{c}' for word '{w}'. Skipping.")
                 continue
@@ -112,6 +123,7 @@ def augmentation_logic(conversation_history, aac_library_df: pd.DataFrame):
         for word_pair in output.missing_words:
             try:
                 c, w = word_pair.split("-")
+                c = CATEGORY_ALIASES.get(c, c)
                 if c in VALID_CATEGORIES:
                     if not ((aac_library_df["category"] == c) & (aac_library_df["word"] == w)).any():
                         image_path = AAC_IMAGES_DIR / c / f"{w}.png"

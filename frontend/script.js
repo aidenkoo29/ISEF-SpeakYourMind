@@ -53,12 +53,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     function renderTabs() {
-    const categories = ['All', '즐겨찾기', ...new Set(aacData.map(item => item.category))];
+    const categories = ['All', 'Favorites', ...new Set(aacData.map(item => item.category))];
     tabsContainer.innerHTML = '';
     categories.forEach(category => {
         const tabBtn = document.createElement('button');
         tabBtn.className = 'tab-btn';
-        tabBtn.textContent = category === 'All' ? '전체' : category;
+        tabBtn.textContent = category === 'All' ? 'All' : category;
         tabBtn.dataset.category = category;
 
         if (category === 'All') tabBtn.classList.add('active');
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function playAudioUrl(url) {
         if (!url) {
-            showToast('오디오 경로가 없습니다.', 'error');
+            showToast('Audio path not available.', 'error');
             return;
         }
         const audio = new Audio(normalizeAssetPath(url));
@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
         communityResults.innerHTML = '';
 
         if (!cards || cards.length === 0) {
-            communityResults.innerHTML = '<p>결과가 없습니다.</p>';
+            communityResults.innerHTML = '<p>No results found.</p>';
             return;
         }
 
@@ -256,11 +256,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span>${card.category || ''}</span>
                 </div>
                 <div class="community-card-info">
-                    ${tags ? `<span>태그: ${tags}</span>` : ''}
-                    ${context ? `<span>상황: ${context}</span>` : ''}
+                    ${tags ? `<span>Tags: ${tags}</span>` : ''}
+                    ${context ? `<span>Context: ${context}</span>` : ''}
                 </div>
                 <div class="community-card-actions">
-                    <button type="button" data-card-id="${card.id}">자세히</button>
+                    <button type="button" data-card-id="${card.id}">Details</button>
                 </div>
             `;
 
@@ -280,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error loading community results:', error);
             communityResults.innerHTML = '';
-            showToast('커뮤니티 검색에 실패했습니다.', 'error');
+            showToast('Failed to search the community.', 'error');
         }
     }
 
@@ -290,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`http://127.0.0.1:8000/community/card/${cardId}`);
             const result = await response.json();
             if (result.error || !result.card) {
-                showToast('카드를 찾을 수 없습니다.', 'error');
+                showToast('Card not found.', 'error');
                 return;
             }
 
@@ -299,15 +299,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const tags = (card.tags || []).join(', ');
             const contextLines = [
-                card.context_time ? `시간: ${card.context_time}` : '',
-                card.context_place ? `장소: ${card.context_place}` : '',
-                card.context_occasion ? `상황: ${card.context_occasion}` : '',
+                card.context_time ? `Time: ${card.context_time}` : '',
+                card.context_place ? `Place: ${card.context_place}` : '',
+                card.context_occasion ? `Occasion: ${card.context_occasion}` : '',
             ].filter(Boolean);
 
             communityDetailBody.innerHTML = `
                 ${card.image ? `<img src="${normalizeAssetPath(card.image)}" alt="${card.name || ''}">` : ''}
-                <p>카테고리: ${card.category || ''}</p>
-                ${tags ? `<p>태그: ${tags}</p>` : ''}
+                <p>Category: ${card.category || ''}</p>
+                ${tags ? `<p>Tags: ${tags}</p>` : ''}
                 ${contextLines.map(line => `<p>${line}</p>`).join('')}
             `;
 
@@ -316,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
             communityDetailPopup.style.display = 'flex';
         } catch (error) {
             console.error('Error opening community detail:', error);
-            showToast('카드 상세 정보를 불러오지 못했습니다.', 'error');
+            showToast('Failed to load card details.', 'error');
         }
     }
 
@@ -329,7 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const result = await response.json();
             if (result.error || !result.copied) {
-                showToast('카드 복사에 실패했습니다.', 'error');
+                showToast('Failed to copy the card.', 'error');
                 return;
             }
 
@@ -344,16 +344,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const activeCategory = document.querySelector('.tab-btn.active')?.dataset.category || 'All';
                 renderCards(activeCategory);
             }
-            showToast('내 라이브러리에 추가되었습니다.', 'success');
+            showToast('Added to your library.', 'success');
         } catch (error) {
             console.error('Error copying community card:', error);
-            showToast('카드 복사에 실패했습니다.', 'error');
+            showToast('Failed to copy the card.', 'error');
         }
     }
 
     function populateShareSelect() {
         shareCardSelect.innerHTML = '';
-        const sorted = [...aacData].sort((a, b) => a.word.localeCompare(b.word, 'ko'));
+        const sorted = [...aacData].sort((a, b) => a.word.localeCompare(b.word, 'en'));
         sorted.forEach(item => {
             const option = document.createElement('option');
             option.value = `${item.category}|||${item.word}`;
@@ -374,13 +374,13 @@ document.addEventListener('DOMContentLoaded', () => {
     async function submitShare() {
         const selectedValue = shareCardSelect.value;
         if (!selectedValue) {
-            showToast('공유할 카드를 선택해주세요.', 'error');
+            showToast('Please select a card to share.', 'error');
             return;
         }
         const [category, word] = selectedValue.split('|||');
         const card = aacData.find(item => item.category === category && item.word === word);
         if (!card) {
-            showToast('선택한 카드를 찾을 수 없습니다.', 'error');
+            showToast('Selected card not found.', 'error');
             return;
         }
 
@@ -408,15 +408,15 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const result = await response.json();
             if (!result.card) {
-                showToast('공유에 실패했습니다.', 'error');
+                showToast('Failed to share the card.', 'error');
                 return;
             }
             communitySharePopup.style.display = 'none';
             await loadCommunityResults(communitySearchInput.value.trim());
-            showToast('커뮤니티에 공유했습니다.', 'success');
+            showToast('Shared to the community.', 'success');
         } catch (error) {
             console.error('Error sharing community card:', error);
-            showToast('공유에 실패했습니다.', 'error');
+            showToast('Failed to share the card.', 'error');
         }
     }
 
@@ -465,13 +465,13 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error loading new card suggestions:', error);
             suggestedNewCardsContainer.innerHTML = '';
-            showToast('추천 카드를 불러오지 못했습니다.', 'error');
+            showToast('Failed to load suggested cards.', 'error');
         }
     }
 
     function renderNewCardSuggestions(suggestions) {
         if (suggestions.length === 0) {
-            suggestedNewCardsContainer.innerHTML = '<p>새로 추천할 카드가 없습니다.</p>';
+            suggestedNewCardsContainer.innerHTML = '<p>No new cards to suggest.</p>';
             return;
         }
 
@@ -492,14 +492,14 @@ document.addEventListener('DOMContentLoaded', () => {
             actions.className = 'suggestion-actions';
 
             const button = document.createElement('button');
-            button.textContent = exists ? '이미 추가됨' : '생성하기';
+            button.textContent = exists ? 'Already Added' : 'Generate';
             button.disabled = exists;
 
             const status = document.createElement('span');
 
             button.addEventListener('click', async () => {
                 button.disabled = true;
-                button.textContent = '생성중...';
+                button.textContent = 'Generating...';
                 status.textContent = '';
 
                 try {
@@ -513,8 +513,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (error) {
                     console.error('Error generating card:', error);
                     button.disabled = false;
-                    button.textContent = '생성하기';
-                    showToast('카드 생성에 실패했습니다.', 'error');
+                    button.textContent = 'Generate';
+                    showToast('Failed to generate the card.', 'error');
                 }
             });
 
@@ -536,8 +536,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await response.json();
                 if (result.status === 'done') {
                     clearInterval(interval);
-                    button.textContent = '완료';
-                    statusEl.textContent = '완료';
+                    button.textContent = 'Done';
+                    statusEl.textContent = 'Done';
 
                     const card = result.card || { ...item, image: `../aac_images/${item.category}/${item.word}.png` };
                     if (!aacData.some(c => c.category === card.category && c.word === card.word)) {
@@ -545,13 +545,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         renderTabs();
                         renderCards(document.querySelector('.tab-btn.active').dataset.category);
                     }
-                    showToast('카드가 추가되었습니다.', 'success');
+                    showToast('Card added.', 'success');
                 } else if (result.status === 'error') {
                     clearInterval(interval);
                     button.disabled = false;
-                    button.textContent = '생성하기';
-                    statusEl.textContent = '실패';
-                    showToast('카드 생성에 실패했습니다.', 'error');
+                    button.textContent = 'Generate';
+                    statusEl.textContent = 'Failed';
+                    showToast('Failed to generate the card.', 'error');
                 }
             } catch (error) {
                 console.error('Error polling job status:', error);
@@ -599,7 +599,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             mediaRecorder.onstop = async () => {
                 if (audioChunks.length === 0) {
-                    alert("녹음된 오디오가 없습니다.");
+                    alert('No recorded audio found.');
                     return;
                 }
 
@@ -627,8 +627,8 @@ document.addEventListener('DOMContentLoaded', () => {
             recordBtn.classList.add('recording');
 
         } catch (err) {
-            console.error('마이크 접근 오류:', err);
-            alert('마이크 권한이 필요합니다.');
+            console.error('Microphone access error:', err);
+            alert('Microphone permission is required.');
         }
     }
 

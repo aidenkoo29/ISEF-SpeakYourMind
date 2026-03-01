@@ -11,11 +11,11 @@
         <div class="top-section">
             <div id="selected-cards-container">
                 <div class="selected-cards-wrapper">
-                    <h3>내가 고른 대화 카드</h3>
+                    <h3>Selected Cards</h3>
                     <div class="controls">
-                        <button id="reset-btn" type="button">리셋</button>
+                        <button id="reset-btn" type="button">Reset</button>
                         <button id="suggestion-btn" type="button">
-                            카드 추천받기
+                            Card Suggestion
                             <span class="spinner" id="suggestion-spinner" style="display: none;"></span>
                         </button>
                     </div>
@@ -24,29 +24,29 @@
             </div>
 
             <div id="suggested-cards-container">
-                <h3>추천 카드</h3>
+                <h3>Suggested Cards</h3>
                 <div id="suggested-cards"></div>
             </div>
         </div>
 
         <div class="main-content">
             <div class="tabs">
-                <button class="tab-btn active" data-category="all">전체</button>
-                <button class="tab-btn" data-category="favorite">즐겨찾기</button>
+                <button class="tab-btn active" data-category="all">All</button>
+                <button class="tab-btn" data-category="favorite">Favorites</button>
             </div>
             <div id="card-container"></div>
         </div>
     </div>
 
     
-    <button id="add-card-btn" class="floating-btn add-card-btn" title="카드 추가하기"></button>
-    <button id="record-btn" class="floating-btn record-btn" title="녹음 시작"></button>
-    <button id="community-btn" class="floating-btn community-btn" title="커뮤니티"></button>
+    <button id="add-card-btn" class="floating-btn add-card-btn" title="Card Augmentation"></button>
+    <button id="record-btn" class="floating-btn record-btn" title="Start Recording"></button>
+    <button id="community-btn" class="floating-btn community-btn" title="Community"></button>
 
     <div id="augmented-popup" class="popup-overlay" style="display: none;">
         <div class="popup-content">
             <span class="close-btn">&times;</span>
-            <h3>새로 추가된 카드</h3>
+            <h3>Newly Added Cards</h3>
             <div id="augmented-cards-popup-container"></div>
         </div>
     </div>
@@ -55,8 +55,8 @@
         <div class="popup-content">
             <span class="close-btn" id="suggestion-close-btn">&times;</span>
             <div class="popup-header">
-                <h3>추가 추천 카드</h3>
-                <button id="refresh-suggestions-btn" type="button">추천 다시 받기</button>
+                <h3>Card Augmentation</h3>
+                <button id="refresh-suggestions-btn" type="button">Refresh Suggestions</button>
             </div>
             <div id="suggested-new-cards-container"></div>
         </div>
@@ -68,15 +68,15 @@
         <div class="popup-content">
             <span class="close-btn" id="community-close-btn">&times;</span>
             <div class="popup-header">
-                <h3>커뮤니티 카드</h3>
+                <h3>Community Cards</h3>
                 <div class="community-actions">
-                    <button id="open-share-btn" type="button">공유하기</button>
+                    <button id="open-share-btn" type="button">Share</button>
                 </div>
             </div>
 
             <div class="community-search">
-                <input id="community-search-input" type="text" placeholder="검색어를 입력하세요" />
-                <button id="community-search-btn" type="button">검색</button>
+                <input id="community-search-input" type="text" placeholder="Enter a search term" />
+                <button id="community-search-btn" type="button">Search</button>
             </div>
             <div id="community-results"></div>
         </div>
@@ -88,8 +88,8 @@
             <h3 id="community-detail-title"></h3>
             <div id="community-detail-body"></div>
             <div class="community-detail-actions">
-                <button id="community-detail-audio-btn" type="button">오디오 재생</button>
-                <button id="community-detail-copy-btn" type="button">내 라이브러리에 추가</button>
+                <button id="community-detail-audio-btn" type="button">Play Audio</button>
+                <button id="community-detail-copy-btn" type="button">Add to Library</button>
             </div>
         </div>
     </div>
@@ -97,20 +97,20 @@
     <div id="community-share-popup" class="popup-overlay" style="display: none;">
         <div class="popup-content">
             <span class="close-btn" id="community-share-close-btn">&times;</span>
-            <h3>커뮤니티에 카드 공유</h3>
+            <h3>Share a Card to the Community</h3>
             <div class="share-form">
-                <label>카드 선택</label>
+                <label>Select Card</label>
                 <select id="share-card-select"></select>
 
-                <label>시간</label>
-                <input id="share-time" type="text" placeholder="예: 저녁" />
-                <label>장소</label>
-                <input id="share-place" type="text" placeholder="예: 집" />
-                <label>상황</label>
-                <input id="share-occasion" type="text" placeholder="예: 저녁 식사" />
-                <label>태그 (콤마로 구분)</label>
-                <input id="share-tags" type="text" placeholder="예: 음식,한국,밥" />
-                <button id="share-submit-btn" type="button">커뮤니티에 보내기</button>
+                <label>Time</label>
+                <input id="share-time" type="text" placeholder="e.g., evening" />
+                <label>Place</label>
+                <input id="share-place" type="text" placeholder="e.g., home" />
+                <label>Occasion</label>
+                <input id="share-occasion" type="text" placeholder="e.g., dinner" />
+                <label>Tags (comma separated)</label>
+                <input id="share-tags" type="text" placeholder="e.g., food,korean,rice" />
+                <button id="share-submit-btn" type="button">Share to Community</button>
             </div>
         </div>
     </div>

@@ -67,7 +67,7 @@ The following is missing and must be added:
    - Render list in `#community-results`
 
 3. **View card detail**
-   - “자세히” button in results → call `GET /community/card/{id}`
+   - "Details" button in results -> call `GET /community/card/{id}`
    - Show modal `#community-detail-popup`
    - Fill `#community-detail-title`, `#community-detail-body`
    - Hook `#community-detail-audio-btn` to play audio
@@ -104,14 +104,14 @@ Open `index.html` in the browser.
 curl -X POST http://127.0.0.1:8000/community/share \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "김치",
-    "category": "음식",
+    "name": "Kimchi",
+    "category": "Food",
     "tags": ["korean", "food"],
-    "context_time": "점심",
-    "context_place": "집",
-    "context_occasion": "식사",
-    "image": "aac_images/음식/김치.png",
-    "audio": "aac_audios/음식/김치.mp3",
+    "context_time": "Lunch",
+    "context_place": "Home",
+    "context_occasion": "Meal",
+    "image": "aac_images/Food/Kimchi.png",
+    "audio": "aac_audios/Food/Kimchi.mp3",
     "visibility": "public"
   }'
 ```
