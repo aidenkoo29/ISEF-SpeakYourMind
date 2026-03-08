@@ -14,9 +14,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const refreshSuggestionsBtn = document.getElementById('refresh-suggestions-btn');
     const suggestedNewCardsContainer = document.getElementById('suggested-new-cards-container');
     const toastContainer = document.getElementById('toast-container');
-    const communityBtn = document.getElementById('community-btn');
-    const communityPopup = document.getElementById('community-popup');
-    const communityCloseBtn = document.getElementById('community-close-btn');
+    const appSidebar = document.getElementById('app-sidebar');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebarAacBtn = document.getElementById('sidebar-aac-btn');
+    const sidebarCommunityBtn = document.getElementById('sidebar-community-btn');
+    const aacView = document.getElementById('aac-view');
+    const communityView = document.getElementById('community-view');
     const communitySearchInput = document.getElementById('community-search-input');
     const communitySearchBtn = document.getElementById('community-search-btn');
     const communityResults = document.getElementById('community-results');
@@ -202,9 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (event.target === suggestionPopup) {
             suggestionPopup.style.display = 'none';
-        }
-        if (event.target === communityPopup) {
-            communityPopup.style.display = 'none';
         }
         if (event.target === communityDetailPopup) {
             communityDetailPopup.style.display = 'none';
@@ -420,13 +420,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    communityBtn.addEventListener('click', async () => {
-        communityPopup.style.display = 'flex';
-        await loadCommunityResults(communitySearchInput.value.trim());
+    function setActiveView(viewName) {
+        const showCommunity = viewName === 'community';
+        aacView.classList.toggle('active', !showCommunity);
+        communityView.classList.toggle('active', showCommunity);
+        sidebarAacBtn.classList.toggle('active', !showCommunity);
+        sidebarCommunityBtn.classList.toggle('active', showCommunity);
+        document.body.classList.toggle('view-community', showCommunity);
+        if (showCommunity) {
+            loadCommunityResults(communitySearchInput.value.trim());
+        }
+    }
+
+    sidebarToggle.addEventListener('click', () => {
+        appSidebar.classList.toggle('collapsed');
     });
 
-    communityCloseBtn.addEventListener('click', () => {
-        communityPopup.style.display = 'none';
+    sidebarAacBtn.addEventListener('click', () => {
+        setActiveView('aac');
+    });
+
+    sidebarCommunityBtn.addEventListener('click', () => {
+        setActiveView('community');
     });
 
     communityDetailCloseBtn.addEventListener('click', () => {

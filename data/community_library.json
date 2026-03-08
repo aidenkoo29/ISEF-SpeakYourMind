@@ -30,5 +30,213 @@
     "creator_id": "",
     "visibility": "public",
     "created_at": null
+  },
+  {
+    "id": "a0f34329-8eb8-436a-af77-e7c850db1164",
+    "name": "Snack",
+    "category": "Food",
+    "tags": [
+      "Food"
+    ],
+    "context_time": "",
+    "context_place": "",
+    "context_occasion": "",
+    "image": "aac_images/Food/Snack.png",
+    "audio": "aac_audios/Food/Snack.mp3",
+    "creator_id": "",
+    "visibility": "public",
+    "created_at": null
+  },
+  {
+    "id": "3c256366-acaf-4c17-905b-c308a81401aa",
+    "name": "Bread",
+    "category": "Food",
+    "tags": [
+      "Food"
+    ],
+    "context_time": "",
+    "context_place": "",
+    "context_occasion": "",
+    "image": "aac_images/Food/Bread.png",
+    "audio": "aac_audios/Food/Bread.mp3",
+    "creator_id": "",
+    "visibility": "public",
+    "created_at": null
+  },
+  {
+    "id": "ba9a6fe8-0ba7-43f8-9b5f-4bb67f8afc46",
+    "name": "Milk",
+    "category": "Food",
+    "tags": [
+      "Food"
+    ],
+    "context_time": "",
+    "context_place": "",
+    "context_occasion": "",
+    "image": "aac_images/Food/Milk.png",
+    "audio": "aac_audios/Food/Milk.mp3",
+    "creator_id": "",
+    "visibility": "public",
+    "created_at": null
+  },
+  {
+    "id": "99ff9ec4-479b-4b2d-913d-cbb44eefcc67",
+    "name": "Water",
+    "category": "Food",
+    "tags": [
+      "Food"
+    ],
+    "context_time": "",
+    "context_place": "",
+    "context_occasion": "",
+    "image": "aac_images/Food/Water.png",
+    "audio": "aac_audios/Food/Water.mp3",
+    "creator_id": "",
+    "visibility": "public",
+    "created_at": null
+  },
+  {
+    "id": "0a692d2a-ff7c-44f7-ac0a-1cc3812871c8",
+    "name": "Juice",
+    "category": "Food",
+    "tags": [
+      "Food"
+    ],
+    "context_time": "",
+    "context_place": "",
+    "context_occasion": "",
+    "image": "aac_images/Food/Juice.png",
+    "audio": "aac_audios/Food/Juice.mp3",
+    "creator_id": "",
+    "visibility": "public",
+    "created_at": null
+  },
+  {
+    "id": "d9e22d49-39b5-4ecb-a294-aabbaec3b81b",
+    "name": "Apple",
+    "category": "Food",
+    "tags": [
+      "Food"
+    ],
+    "context_time": "",
+    "context_place": "",
+    "context_occasion": "",
+    "image": "aac_images/Food/Apple.png",
+    "audio": "aac_audios/Food/Apple.mp3",
+    "creator_id": "",
+    "visibility": "public",
+    "created_at": null
+  },
+  {
+    "id": "a04fa790-9dca-4b97-adb9-a3cf618a0837",
+    "name": "Banana",
+    "category": "Food",
+    "tags": [
+      "Food"
+    ],
+    "context_time": "",
+    "context_place": "",
+    "context_occasion": "",
+    "image": "aac_images/Food/Banana.png",
+    "audio": "aac_audios/Food/Banana.mp3",
+    "creator_id": "",
+    "visibility": "public",
+    "created_at": null
+  },
+  {
+    "id": "237170de-5c2d-4034-ace3-5645ce1be065",
+    "name": "Chicken",
+    "category": "Food",
+    "tags": [
+      "Food"
+    ],
+    "context_time": "",
+    "context_place": "",
+    "context_occasion": "",
+    "image": "aac_images/Food/Chicken.png",
+    "audio": "aac_audios/Food/Chicken.mp3",
+    "creator_id": "",
+    "visibility": "public",
+    "created_at": null
+  },
+  {
+    "id": "7aa858ce-5d41-4144-8423-1a90b1912bae",
+    "name": "Pizza",
+    "category": "Food",
+    "tags": [
+      "Food"
+    ],
+    "context_time": "",
+    "context_place": "",
+    "context_occasion": "",
+    "image": "aac_images/Food/Pizza.png",
+    "audio": "aac_audios/Food/Pizza.mp3",
+    "creator_id": "",
+    "visibility": "public",
+    "created_at": null
+  },
+  {
+    "id": "00577c4d-27f9-406f-ab6c-18ee3e7daf23",
+    "name": "Egg",
+    "category": "Food",
+    "tags": [
+      "Food"
+    ],
+    "context_time": "",
+    "context_place": "",
+    "context_occasion": "",
+    "image": "aac_images/Food/Egg.png",
+    "audio": "aac_audios/Food/Egg.mp3",
+    "creator_id": "",
+    "visibility": "public",
+    "created_at": null
+  },
+  {
+    "id": "0ae1afc0-6d3f-41db-9180-c2162bb4cf5e",
+    "name": "Ice Cream",
+    "category": "Food",
+    "tags": [
+      "Food"
+    ],
+    "context_time": "",
+    "context_place": "",
+    "context_occasion": "",
+    "image": "aac_images/Food/Ice Cream.png",
+    "audio": "aac_audios/Food/Ice Cream.mp3",
+    "creator_id": "",
+    "visibility": "public",
+    "created_at": null
+  },
+  {
+    "id": "3f64f819-c440-4426-b7ac-16b8eed34389",
+    "name": "Watermelon",
+    "category": "Food",
+    "tags": [
+      "Food"
+    ],
+    "context_time": "",
+    "context_place": "",
+    "context_occasion": "",
+    "image": "aac_images/Food/Watermelon.png",
+    "audio": "aac_audios/Food/Watermelon.mp3",
+    "creator_id": "",
+    "visibility": "public",
+    "created_at": null
+  },
+  {
+    "id": "6381267a-81dc-48ee-820e-605ce7a0e37c",
+    "name": "Chocolate",
+    "category": "Food",
+    "tags": [
+      "Food"
+    ],
+    "context_time": "",
+    "context_place": "",
+    "context_occasion": "",
+    "image": "aac_images/Food/Chocolate.png",
+    "audio": "aac_audios/Food/Chocolate.mp3",
+    "creator_id": "",
+    "visibility": "public",
+    "created_at": null
   }
 ]
