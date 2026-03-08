@@ -118,8 +118,10 @@
             <span class="close-btn" id="community-share-close-btn">&times;</span>
             <h3>Share a Card to the Community</h3>
             <div class="share-form">
-                <label>Select Card</label>
-                <select id="share-card-select"></select>
+                <label for="share-card-search">Select Card</label>
+                <input id="share-card-search" type="text" placeholder="Search your library (e.g., pizza)" autocomplete="off" />
+                <div id="share-card-results" class="share-card-results"></div>
+                <div id="share-card-selected" class="share-card-selected" style="display: none;"></div>
 
                 <label>Time</label>
                 <input id="share-time" type="text" placeholder="e.g., evening" />

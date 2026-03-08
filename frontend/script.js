@@ -32,12 +32,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const communitySharePopup = document.getElementById('community-share-popup');
     const communityShareCloseBtn = document.getElementById('community-share-close-btn');
     const openShareBtn = document.getElementById('open-share-btn');
-    const shareCardSelect = document.getElementById('share-card-select');
+    const shareCardSearch = document.getElementById('share-card-search');
+    const shareCardResults = document.getElementById('share-card-results');
+    const shareCardSelected = document.getElementById('share-card-selected');
     const shareTimeInput = document.getElementById('share-time');
     const sharePlaceInput = document.getElementById('share-place');
     const shareOccasionInput = document.getElementById('share-occasion');
     const shareTagsInput = document.getElementById('share-tags');
     const shareSubmitBtn = document.getElementById('share-submit-btn');
+    let shareSelectedCard = null;
 
     let aacData = [];
     let selectedCards = [];
@@ -427,19 +430,51 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function populateShareSelect() {
-        shareCardSelect.innerHTML = '';
+    function renderSharePicker(query = '') {
+        shareCardResults.innerHTML = '';
+        const q = query.trim().toLowerCase();
         const sorted = [...aacData].sort((a, b) => a.word.localeCompare(b.word, 'en'));
-        sorted.forEach(item => {
-            const option = document.createElement('option');
-            option.value = `${item.category}|||${item.word}`;
-            option.textContent = `${item.word} (${item.category})`;
-            shareCardSelect.appendChild(option);
+        const filtered = q
+            ? sorted.filter(item =>
+                item.word.toLowerCase().includes(q) ||
+                item.category.toLowerCase().includes(q)
+            )
+            : sorted.slice(0, 24);
+
+        if (filtered.length === 0) {
+            shareCardResults.innerHTML = '<p>No matching cards.</p>';
+            return;
+        }
+
+        filtered.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'share-card-item';
+            card.innerHTML = `
+                <img src="${normalizeAssetPath(item.image)}" alt="${item.word}">
+                <strong>${item.word}</strong>
+                <span>${item.category}</span>
+            `;
+            card.addEventListener('click', () => {
+                shareSelectedCard = item;
+                shareCardSelected.style.display = 'flex';
+                shareCardSelected.innerHTML = `
+                    <img src="${normalizeAssetPath(item.image)}" alt="${item.word}">
+                    <div>
+                        <strong>${item.word}</strong>
+                        <span>${item.category}</span>
+                    </div>
+                `;
+            });
+            shareCardResults.appendChild(card);
         });
     }
 
     function openSharePopup() {
-        populateShareSelect();
+        shareSelectedCard = null;
+        shareCardSearch.value = '';
+        shareCardSelected.style.display = 'none';
+        shareCardSelected.innerHTML = '';
+        renderSharePicker('');
         shareTimeInput.value = '';
         sharePlaceInput.value = '';
         shareOccasionInput.value = '';
@@ -448,17 +483,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function submitShare() {
-        const selectedValue = shareCardSelect.value;
-        if (!selectedValue) {
-            showToast('Please select a card to share.', 'error');
-            return;
-        }
-        const [category, word] = selectedValue.split('|||');
-        const card = aacData.find(item => item.category === category && item.word === word);
-        if (!card) {
+        if (!shareSelectedCard) {
             showToast('Selected card not found.', 'error');
             return;
         }
+        const card = shareSelectedCard;
 
         const tags = shareTagsInput.value
             .split(',')
@@ -541,6 +570,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     openShareBtn.addEventListener('click', () => {
         openSharePopup();
+    });
+
+    shareCardSearch.addEventListener('input', (event) => {
+        renderSharePicker(event.target.value);
     });
 
     shareSubmitBtn.addEventListener('click', async () => {
