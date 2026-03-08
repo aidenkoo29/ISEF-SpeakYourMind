@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let aacData = [];
     let selectedCards = [];
+    let favoriteKeys = new Set();
 
     // Fetch and parse CSV data
     fetch('../data/aac_library.csv')
@@ -51,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const [category, word] = row.split(',');
                 return { category, word, image: `../aac_images/${category}/${word}.png` };
             });
+            favoriteKeys = loadFavorites();
             renderTabs();
             renderCards('All');
         });
@@ -79,7 +81,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderCards(category) {
         cardContainer.innerHTML = '';
-        const filteredData = category === 'All' ? aacData : aacData.filter(item => item.category === category);
+        let filteredData = [];
+        if (category === 'All') {
+            filteredData = aacData;
+        } else if (category === 'Favorites') {
+            filteredData = aacData.filter(item => favoriteKeys.has(makeFavoriteKey(item)));
+        } else {
+            filteredData = aacData.filter(item => item.category === category);
+        }
+        if (filteredData.length === 0) {
+            cardContainer.innerHTML = '<p>No cards to show.</p>';
+            return;
+        }
         filteredData.forEach(item => {
             const card = createCard(item);
             card.addEventListener('click', () => addToSelected(item));
@@ -90,7 +103,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function createCard(item) {
         const card = document.createElement('div');
         card.className = 'card';
-        card.innerHTML = `<img src="${normalizeAssetPath(item.image)}" alt="${item.word}"><p>${item.word}</p>`;
+        const isFavorite = favoriteKeys.has(makeFavoriteKey(item));
+        card.innerHTML = `
+            <button type="button" class="favorite-toggle ${isFavorite ? 'active' : ''}" aria-label="Favorite"></button>
+            <img src="${normalizeAssetPath(item.image)}" alt="${item.word}">
+            <p>${item.word}</p>
+        `;
+        const favBtn = card.querySelector('.favorite-toggle');
+        favBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            toggleFavorite(item, favBtn);
+        });
         return card;
     }
 
@@ -150,6 +173,41 @@ document.addEventListener('DOMContentLoaded', () => {
             selectedCardsContainer.appendChild(card);
         });
         updateSelectionOnServer();
+    }
+
+    function makeFavoriteKey(item) {
+        return `${item.category}|||${item.word}`;
+    }
+
+    function loadFavorites() {
+        try {
+            const raw = localStorage.getItem('aac_favorites');
+            if (!raw) return new Set();
+            const parsed = JSON.parse(raw);
+            return new Set(Array.isArray(parsed) ? parsed : []);
+        } catch {
+            return new Set();
+        }
+    }
+
+    function saveFavorites() {
+        localStorage.setItem('aac_favorites', JSON.stringify(Array.from(favoriteKeys)));
+    }
+
+    function toggleFavorite(item, buttonEl) {
+        const key = makeFavoriteKey(item);
+        if (favoriteKeys.has(key)) {
+            favoriteKeys.delete(key);
+            buttonEl.classList.remove('active');
+        } else {
+            favoriteKeys.add(key);
+            buttonEl.classList.add('active');
+        }
+        saveFavorites();
+        const activeCategory = document.querySelector('.tab-btn.active')?.dataset.category || 'All';
+        if (activeCategory === 'Favorites') {
+            renderCards('Favorites');
+        }
     }
 
     const suggestionBtn = document.getElementById('suggestion-btn');
@@ -247,25 +305,43 @@ document.addEventListener('DOMContentLoaded', () => {
             const wrapper = document.createElement('div');
             wrapper.className = 'community-card';
 
-            const tags = (card.tags || []).join(', ');
-            const context = [card.context_time, card.context_place, card.context_occasion].filter(Boolean).join(' · ');
+            const isInLibrary = aacData.some(item => item.category === card.category && item.word === card.name);
 
             wrapper.innerHTML = `
-                <div class="community-card-meta">
+                <div class="community-card-image">
+                    ${card.image ? `<img src="${normalizeAssetPath(card.image)}" alt="${card.name || ''}">` : ''}
+                </div>
+                <div class="community-card-body">
                     <strong>${card.name}</strong>
                     <span>${card.category || ''}</span>
                 </div>
-                <div class="community-card-info">
-                    ${tags ? `<span>Tags: ${tags}</span>` : ''}
-                    ${context ? `<span>Context: ${context}</span>` : ''}
-                </div>
                 <div class="community-card-actions">
-                    <button type="button" data-card-id="${card.id}">Details</button>
+                    <button type="button" class="community-card-cta" data-card-id="${card.id}">
+                        ${isInLibrary ? 'Added' : 'Add'}
+                    </button>
                 </div>
             `;
 
-            const detailBtn = wrapper.querySelector('button[data-card-id]');
-            detailBtn.addEventListener('click', () => openCommunityDetail(card.id));
+            wrapper.addEventListener('click', (event) => {
+                const target = event.target;
+                if (target.closest('.community-card-cta')) {
+                    return;
+                }
+                openCommunityDetail(card.id);
+            });
+
+            const ctaBtn = wrapper.querySelector('button[data-card-id]');
+            if (isInLibrary) {
+                ctaBtn.disabled = true;
+            }
+            ctaBtn.addEventListener('click', async (event) => {
+                event.stopPropagation();
+                if (ctaBtn.disabled) return;
+                ctaBtn.textContent = 'Adding...';
+                ctaBtn.disabled = true;
+                await copyCommunityCard(card.id);
+                ctaBtn.textContent = 'Added';
+            });
 
             communityResults.appendChild(wrapper);
         });
