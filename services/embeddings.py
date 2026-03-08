@@ -39,13 +39,24 @@ def load_library() -> pd.DataFrame:
     library = pd.read_csv(AAC_LIBRARY_PATH)
     library["categoryAndWord"] = library["category"] + "-" + library["word"]
 
-    if os.path.exists(EMBEDDING_PKL_PATH):
-        with open(EMBEDDING_PKL_PATH, "rb") as f:
-            library["vector"] = pickle.load(f)
-    else:
-        library["vector"] = library["word"].apply(lambda x: get_embedding(x))
+    def rebuild_and_cache_vectors() -> pd.Series:
+        vectors = library["word"].apply(lambda x: get_embedding(x))
         with open(EMBEDDING_PKL_PATH, "wb") as f:
-            pickle.dump(library["vector"].tolist(), f)
+            pickle.dump(vectors.tolist(), f)
+        return vectors
+
+    if os.path.exists(EMBEDDING_PKL_PATH):
+        try:
+            with open(EMBEDDING_PKL_PATH, "rb") as f:
+                vectors = pickle.load(f)
+            if len(vectors) != len(library):
+                library["vector"] = rebuild_and_cache_vectors()
+            else:
+                library["vector"] = vectors
+        except Exception:
+            library["vector"] = rebuild_and_cache_vectors()
+    else:
+        library["vector"] = rebuild_and_cache_vectors()
 
     return library
 

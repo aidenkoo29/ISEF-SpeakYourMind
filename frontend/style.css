@@ -1,7 +1,30 @@
+:root {
+    --bg: #f3f4f6;
+    --bg-deep: #e5e7eb;
+    --panel: #ffffff;
+    --panel-border: #e6e8ee;
+    --ink: #1f2937;
+    --muted: #64748b;
+    --primary: #2563eb;
+    --primary-600: #1d4ed8;
+    --accent: #10b981;
+    --accent-600: #0f9a6b;
+    --danger: #ef4444;
+    --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.08);
+    --shadow-card: 0 8px 20px rgba(15, 23, 42, 0.12);
+}
+
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap");
+
 body {
-    font-family: sans-serif;
+    font-family: "Space Grotesk", "Trebuchet MS", sans-serif;
     margin: 0;
-    background-color: #f0f2f5;
+    color: var(--ink);
+    background-color: var(--bg);
+    background-image:
+        radial-gradient(1200px 600px at -10% -20%, #c7d2fe 0%, rgba(199, 210, 254, 0) 60%),
+        radial-gradient(900px 500px at 110% 0%, #bae6fd 0%, rgba(186, 230, 253, 0) 55%),
+        linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
 }
 
 .container {
@@ -19,9 +42,10 @@ body {
 }
 
 #selected-cards-container, #suggested-cards-container {
-    background-color: #fff;
+    background-color: var(--panel);
     border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--panel-border);
+    box-shadow: var(--shadow-soft);
     padding: 15px;
     margin-bottom: 15px;
 }
@@ -44,19 +68,26 @@ body {
 }
 
 .controls button {
-    background-color: #4CAF50;
+    background: linear-gradient(135deg, var(--accent), var(--accent-600));
     color: white;
     border: none;
     padding: 8px 16px;
     font-size: 15px;
     cursor: pointer;
     border-radius: 5px;
-    transition: background-color 0.3s;
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.25);
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
     flex: 0 1 auto;
 }
 
 .controls button:hover {
-    background-color: #45a049;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 18px rgba(16, 185, 129, 0.32);
+}
+
+.controls button:focus-visible {
+    outline: 2px solid rgba(37, 99, 235, 0.5);
+    outline-offset: 2px;
 }
 
 .floating-btn {
@@ -67,7 +98,7 @@ body {
     border: none;
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.2);
     background-repeat: no-repeat;
     background-position: center;
     background-size: 100%;
@@ -93,10 +124,11 @@ body {
 
 .community-btn {
     bottom: 255px;
-    background-color: #111;
+    background: linear-gradient(140deg, #111827, #1f2937);
     color: #fff;
     font-weight: 700;
     font-size: 14px;
+    letter-spacing: 0.6px;
 }
 
 .community-btn::after {
@@ -130,7 +162,8 @@ body {
     flex-wrap: wrap;
     gap: 10px;
     min-height: 175px;
-    border: 1px solid #ddd;
+    border: 1px dashed #cbd5f5;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
     border-radius: 5px;
     padding: 10px;
 }
@@ -138,7 +171,8 @@ body {
 #suggested-cards {
     display: flex;
     gap: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid #e5e7eb;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
     border-radius: 5px;
     padding: 10px;
     height: 175px;
@@ -149,9 +183,10 @@ body {
 
 .main-content {
     flex: 1;
-    background-color: #fff;
+    background-color: var(--panel);
     border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--panel-border);
+    box-shadow: var(--shadow-soft);
     padding: 15px;
     display: flex;
     flex-direction: column;
@@ -163,7 +198,7 @@ body {
     flex-wrap: wrap;
     gap: 5px;
     margin-bottom: 15px;
-    border-bottom: 2px solid #ddd;
+    border-bottom: 2px solid #e2e8f0;
     flex-shrink: 0;
 }
 
@@ -173,13 +208,15 @@ body {
     padding: 10px 20px;
     cursor: pointer;
     font-size: 16px;
-    transition: color 0.3s, border-bottom 0.3s;
-    color: #555;
+    transition: color 0.2s, border-bottom 0.2s, background-color 0.2s;
+    color: var(--muted);
+    border-radius: 8px 8px 0 0;
 }
 
 .tab-btn.active {
-    color: #007bff;
-    border-bottom: 2px solid #007bff;
+    color: var(--primary);
+    border-bottom: 2px solid var(--primary);
+    background: rgba(37, 99, 235, 0.08);
 }
 
 #card-container {
@@ -196,9 +233,10 @@ body {
 .card {
     height: 150px;
     width: 120px;
-    background-color: #fff;
+    background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e7e9f0;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
     cursor: pointer;
     text-align: center;
     padding: 10px;
@@ -211,7 +249,7 @@ body {
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-card);
 }
 
 .card img {
@@ -225,7 +263,7 @@ body {
 .card p {
     margin: 10px 0 0;
     font-size: 14px;
-    color: #333;
+    color: var(--ink);
 }
 
 .spinner {
@@ -245,11 +283,12 @@ body {
 }
 
 #reset-btn {
-    background-color: #f44336;
+    background: linear-gradient(135deg, var(--danger), #dc2626);
 }
 
 #reset-btn:hover {
-    background-color: #d32f2f;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 18px rgba(239, 68, 68, 0.3);
 }
 
 .popup-overlay {
@@ -282,7 +321,7 @@ body {
 }
 
 .popup-header button {
-    background-color: #4CAF50;
+    background: linear-gradient(135deg, var(--accent), var(--accent-600));
     color: white;
     border: none;
     padding: 6px 12px;
@@ -301,14 +340,14 @@ body {
     flex: 1;
     padding: 8px 10px;
     border-radius: 6px;
-    border: 1px solid #ddd;
+    border: 1px solid #e2e8f0;
 }
 
 .community-search button {
     padding: 8px 12px;
     border-radius: 6px;
     border: none;
-    background: #007bff;
+    background: linear-gradient(135deg, var(--primary), var(--primary-600));
     color: #fff;
 }
 
@@ -319,7 +358,7 @@ body {
 }
 
 .community-card {
-    border: 1px solid #e5e5e5;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
     padding: 10px;
     display: flex;
@@ -331,7 +370,7 @@ body {
 .community-card button {
     border: none;
     padding: 6px 10px;
-    background: #4CAF50;
+    background: linear-gradient(135deg, var(--accent), var(--accent-600));
     color: #fff;
     border-radius: 6px;
     cursor: pointer;
@@ -353,14 +392,14 @@ body {
 .share-form select {
     padding: 8px 10px;
     border-radius: 6px;
-    border: 1px solid #ddd;
+    border: 1px solid #e2e8f0;
 }
 
 .share-form button {
     margin-top: 8px;
     padding: 10px 12px;
     border: none;
-    background: #4CAF50;
+    background: linear-gradient(135deg, var(--accent), var(--accent-600));
     color: #fff;
     border-radius: 6px;
     cursor: pointer;
@@ -386,7 +425,7 @@ body {
     justify-content: space-between;
     gap: 12px;
     padding: 10px;
-    border: 1px solid #e5e5e5;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
 }
 
@@ -403,7 +442,7 @@ body {
 }
 
 .suggestion-actions button {
-    background-color: #007bff;
+    background: linear-gradient(135deg, var(--primary), var(--primary-600));
     color: #fff;
     border: none;
     padding: 6px 12px;
