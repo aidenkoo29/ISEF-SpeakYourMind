@@ -2,5 +2,9 @@
   "aidenkoo": {
     "salt": "68553c11f6dbed654a60be768981cb94",
     "hash": "1b7dc43e374805de3679c70fe796fa7f9c9cffc24af13bc2158453e81299ed03"
+  },
+  "abc": {
+    "salt": "2fa81c46f360d90f140724d14905df24",
+    "hash": "54a54fc64ff7c507adac12c522aafc999acad0c9f23b1a88847f669f2993f2dd"
   }
 }
