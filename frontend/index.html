@@ -7,6 +7,44 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="auth-screen" class="auth-screen">
+        <div class="auth-panel">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <p class="auth-kicker">SpeakYourMind</p>
+                    <h1>Welcome Back</h1>
+                    <p class="auth-subtitle">Log in or create an account to continue.</p>
+                </div>
+                <div class="auth-tabs">
+                    <button id="auth-tab-login" class="auth-tab active" type="button">Log In</button>
+                    <button id="auth-tab-signup" class="auth-tab" type="button">Sign Up</button>
+                </div>
+                <div id="auth-error" class="auth-error" style="display: none;"></div>
+                <form id="login-form" class="auth-form">
+                    <label for="login-username">Username</label>
+                    <input id="login-username" type="text" autocomplete="username" />
+                    <label for="login-password">Password</label>
+                    <input id="login-password" type="password" autocomplete="current-password" />
+                    <button type="submit">Log In</button>
+                </form>
+                <form id="signup-form" class="auth-form" style="display: none;">
+                    <label for="signup-username">Username</label>
+                    <input id="signup-username" type="text" autocomplete="username" />
+                    <label for="signup-password">Password</label>
+                    <input id="signup-password" type="password" autocomplete="new-password" />
+                    <button type="submit">Create Account</button>
+                </form>
+            </div>
+            <div class="auth-visual">
+                <img src="assets/realistic_nature_cat.png" alt="Calm nature scene with a cat" />
+                <div class="auth-slogan">
+                    <span>“Quiet voices,</span>
+                    <span>louder voices”</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="app-shell">
         <aside class="sidebar collapsed" id="app-sidebar">
             <button id="sidebar-toggle" class="sidebar-toggle" type="button" aria-label="Toggle sidebar">
@@ -17,6 +55,8 @@
             <nav class="sidebar-nav">
                 <button id="sidebar-aac-btn" class="sidebar-btn active" type="button" data-view="aac">AAC</button>
                 <button id="sidebar-community-btn" class="sidebar-btn" type="button" data-view="community">Community</button>
+                <button id="sidebar-settings-btn" class="sidebar-btn" type="button" data-view="settings">Settings</button>
+                <button id="logout-btn" class="sidebar-btn logout" type="button">Log Out</button>
             </nav>
         </aside>
 
@@ -74,21 +114,49 @@
                     <div id="community-results" class="community-results"></div>
                 </div>
             </div>
+
+            <div class="view view-settings" id="settings-view">
+                <div class="settings-page">
+                    <div class="settings-header">
+                        <div>
+                            <p class="settings-kicker">Account</p>
+                            <h2>Settings</h2>
+                            <p class="settings-subtitle">Manage your profile and password.</p>
+                        </div>
+                    </div>
+                    <div class="settings-card">
+                        <div class="settings-row">
+                            <span class="settings-label">Username</span>
+                            <span id="settings-username" class="settings-value">-</span>
+                        </div>
+                        <form id="settings-password-form" class="settings-form">
+                            <label for="current-password">Current Password</label>
+                            <input id="current-password" type="password" autocomplete="current-password" />
+                            <label for="new-password">New Password</label>
+                            <input id="new-password" type="password" autocomplete="new-password" />
+                            <button type="submit">Change Password</button>
+                        </form>
+                        <div id="settings-message" class="settings-message" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
-    <button id="add-card-btn" class="floating-btn add-card-btn" title="Card Augmentation"></button>
-    <button id="record-btn" class="floating-btn record-btn" title="Start Recording"></button>
+    <button id="add-card-btn" class="floating-btn add-card-btn app-only" title="Card Augmentation"></button>
+    <button id="record-btn" class="floating-btn record-btn app-only" title="Start Recording"></button>
 
-    <div id="augmented-popup" class="popup-overlay" style="display: none;">
+    <div id="augmented-popup" class="popup-overlay app-only" style="display: none;">
         <div class="popup-content">
-            <span class="close-btn">&times;</span>
-            <h3>Newly Added Cards</h3>
+            <div class="popup-header">
+                <h3>Newly Added Cards</h3>
+                <button class="close-btn" type="button">&times;</button>
+            </div>
             <div id="augmented-cards-popup-container"></div>
         </div>
     </div>
 
-    <div id="suggestion-popup" class="popup-overlay" style="display: none;">
+    <div id="suggestion-popup" class="popup-overlay app-only" style="display: none;">
         <div class="popup-content">
             <span class="close-btn" id="suggestion-close-btn">&times;</span>
             <div class="popup-header">
@@ -99,12 +167,14 @@
         </div>
     </div>
 
-    <div id="toast-container" class="toast-container"></div>
+    <div id="toast-container" class="toast-container app-only"></div>
 
-    <div id="community-detail-popup" class="popup-overlay" style="display: none;">
+    <div id="community-detail-popup" class="popup-overlay app-only" style="display: none;">
         <div class="popup-content">
-            <span class="close-btn" id="community-detail-close-btn">&times;</span>
-            <h3 id="community-detail-title"></h3>
+            <div class="popup-header">
+                <h3 id="community-detail-title"></h3>
+                <button class="close-btn" id="community-detail-close-btn" type="button">&times;</button>
+            </div>
             <div id="community-detail-body"></div>
             <div class="community-detail-actions">
                 <button id="community-detail-audio-btn" type="button">Play Audio</button>
@@ -113,10 +183,12 @@
         </div>
     </div>
 
-    <div id="community-share-popup" class="popup-overlay" style="display: none;">
+    <div id="community-share-popup" class="popup-overlay app-only" style="display: none;">
         <div class="popup-content">
-            <span class="close-btn" id="community-share-close-btn">&times;</span>
-            <h3>Share a Card to the Community</h3>
+            <div class="popup-header">
+                <h3>Share a Card to the Community</h3>
+                <button class="close-btn" id="community-share-close-btn" type="button">&times;</button>
+            </div>
             <div class="share-form">
                 <label for="share-card-search">Select Card</label>
                 <input id="share-card-search" type="text" placeholder="Search your library (e.g., pizza)" autocomplete="off" />

@@ -1,4 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const authScreen = document.getElementById('auth-screen');
+    const appShell = document.querySelector('.app-shell');
+    const authTabLogin = document.getElementById('auth-tab-login');
+    const authTabSignup = document.getElementById('auth-tab-signup');
+    const authError = document.getElementById('auth-error');
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const loginUsernameInput = document.getElementById('login-username');
+    const loginPasswordInput = document.getElementById('login-password');
+    const signupUsernameInput = document.getElementById('signup-username');
+    const signupPasswordInput = document.getElementById('signup-password');
+    const logoutBtn = document.getElementById('logout-btn');
     const cardContainer = document.getElementById('card-container');
     const selectedCardsContainer = document.getElementById('selected-cards');
     const suggestedCardsContainer = document.getElementById('suggested-cards');
@@ -18,8 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarToggle = document.getElementById('sidebar-toggle');
     const sidebarAacBtn = document.getElementById('sidebar-aac-btn');
     const sidebarCommunityBtn = document.getElementById('sidebar-community-btn');
+    const sidebarSettingsBtn = document.getElementById('sidebar-settings-btn');
     const aacView = document.getElementById('aac-view');
     const communityView = document.getElementById('community-view');
+    const settingsView = document.getElementById('settings-view');
     const communitySearchInput = document.getElementById('community-search-input');
     const communitySearchBtn = document.getElementById('community-search-btn');
     const communityResults = document.getElementById('community-results');
@@ -40,25 +54,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const shareOccasionInput = document.getElementById('share-occasion');
     const shareTagsInput = document.getElementById('share-tags');
     const shareSubmitBtn = document.getElementById('share-submit-btn');
+    const settingsUsername = document.getElementById('settings-username');
+    const settingsPasswordForm = document.getElementById('settings-password-form');
+    const currentPasswordInput = document.getElementById('current-password');
+    const newPasswordInput = document.getElementById('new-password');
+    const settingsMessage = document.getElementById('settings-message');
     let shareSelectedCard = null;
 
     let aacData = [];
     let selectedCards = [];
     let favoriteKeys = new Set();
+    const audioCache = new Map();
+    let selectionUpdateTimer = null;
+    const MAX_AUDIO_PREFETCH = 30;
+    const popups = [augmentedPopup, suggestionPopup, communityDetailPopup, communitySharePopup];
+    popups.forEach(popup => enablePopupDragging(popup));
+    let appInitialized = false;
 
-    // Fetch and parse CSV data
-    fetch('../data/aac_library.csv')
-        .then(response => response.text())
-        .then(data => {
-            const rows = data.trim().split('\n').slice(1);
-            aacData = rows.map(row => {
-                const [category, word] = row.split(',');
-                return { category, word, image: `../aac_images/${category}/${word}.png` };
+    function initApp() {
+        if (appInitialized) return;
+        appInitialized = true;
+        fetch('../data/aac_library.csv')
+            .then(response => response.text())
+            .then(data => {
+                const rows = data.trim().split('\n').slice(1);
+                aacData = rows.map(row => {
+                    const [category, word] = row.split(',');
+                    return { category, word, image: `../aac_images/${category}/${word}.png` };
+                });
+                favoriteKeys = loadFavorites();
+                renderTabs();
+                renderCards('All');
             });
-            favoriteKeys = loadFavorites();
-            renderTabs();
-            renderCards('All');
-        });
+    }
 
     function renderTabs() {
     const categories = ['All', 'Favorites', ...new Set(aacData.map(item => item.category))];
@@ -101,6 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
             card.addEventListener('click', () => addToSelected(item));
             cardContainer.appendChild(card);
         });
+        prefetchAudio(filteredData);
     }
 
     function createCard(item) {
@@ -127,8 +156,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playAudio(item) {
-        const audio = new Audio(`../aac_audios/${item.category}/${item.word}.mp3`);
-        audio.play();
+        const audio = getCachedAudio(item);
+        if (!audio) return;
+        audio.currentTime = 0;
+        audio.play().catch(() => {
+            // Ignore autoplay/interaction errors; card clicks are user-driven anyway.
+        });
     }
 
     function playAudioUrl(url) {
@@ -136,8 +169,17 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Audio path not available.', 'error');
             return;
         }
-        const audio = new Audio(normalizeAssetPath(url));
-        audio.play();
+        const key = `url:::${url}`;
+        let audio = audioCache.get(key);
+        if (!audio) {
+            audio = new Audio(normalizeAssetPath(url));
+            audio.preload = 'auto';
+            audioCache.set(key, audio);
+        }
+        audio.currentTime = 0;
+        audio.play().catch(() => {
+            // Ignore autoplay/interaction errors; this is user-initiated.
+        });
     }
 
     function normalizeAssetPath(path) {
@@ -163,6 +205,230 @@ document.addEventListener('DOMContentLoaded', () => {
         return path.startsWith('../') ? path.slice(3) : path;
     }
 
+    let authToken = null;
+
+    function getAuthToken() {
+        return authToken;
+    }
+
+    function setAuthError(message = '') {
+        if (!authError) return;
+        if (!message) {
+            authError.style.display = 'none';
+            authError.textContent = '';
+            return;
+        }
+        authError.textContent = message;
+        authError.style.display = 'block';
+    }
+
+    function setAuthMode(mode) {
+        const isLogin = mode === 'login';
+        authTabLogin.classList.toggle('active', isLogin);
+        authTabSignup.classList.toggle('active', !isLogin);
+        loginForm.style.display = isLogin ? 'flex' : 'none';
+        signupForm.style.display = isLogin ? 'none' : 'flex';
+        setAuthError('');
+    }
+
+    function showAuthScreen() {
+        document.body.classList.remove('is-authenticated');
+        authScreen.style.display = 'flex';
+        appShell.classList.remove('is-visible');
+    }
+
+    function showAppScreen() {
+        document.body.classList.add('is-authenticated');
+        authScreen.style.display = 'none';
+        appShell.classList.add('is-visible');
+        appSidebar.classList.remove('collapsed');
+        initApp();
+        setActiveView('aac');
+        refreshSettings();
+    }
+
+    function formatAuthError(code) {
+        switch (code) {
+            case 'invalid_credentials':
+                return 'Invalid username or password.';
+            case 'unauthorized':
+                return 'Please log in again.';
+            case 'user_exists':
+                return 'That username is already taken.';
+            case 'username_too_short':
+                return 'Username must be at least 3 characters.';
+            case 'username_too_long':
+                return 'Username must be 40 characters or fewer.';
+            case 'password_too_short':
+                return 'Password must be at least 8 characters.';
+            case 'password_too_long':
+                return 'Password must be 128 characters or fewer.';
+            default:
+                return 'Something went wrong. Please try again.';
+        }
+    }
+
+    function setSettingsMessage(message, type = 'success') {
+        if (!settingsMessage) return;
+        settingsMessage.textContent = message;
+        settingsMessage.classList.remove('success', 'error');
+        settingsMessage.classList.add(type);
+        settingsMessage.style.display = 'block';
+    }
+
+    async function refreshSettings() {
+        if (!settingsUsername) return;
+        const token = getAuthToken();
+        if (!token) {
+            settingsUsername.textContent = '-';
+            return;
+        }
+        try {
+            const response = await fetch('http://127.0.0.1:8000/auth/me', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const result = await response.json();
+            settingsUsername.textContent = result.user?.username || '-';
+        } catch (error) {
+            console.error('Failed to load settings:', error);
+        }
+    }
+
+    function clearAuth() {
+        authToken = null;
+        loginUsernameInput.value = '';
+        loginPasswordInput.value = '';
+        signupUsernameInput.value = '';
+        signupPasswordInput.value = '';
+        currentPasswordInput.value = '';
+        newPasswordInput.value = '';
+        settingsMessage.style.display = 'none';
+        setAuthError('');
+        showAuthScreen();
+    }
+
+    authTabLogin.addEventListener('click', () => setAuthMode('login'));
+    authTabSignup.addEventListener('click', () => setAuthMode('signup'));
+
+    loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        setAuthError('');
+        const username = loginUsernameInput.value.trim();
+        const password = loginPasswordInput.value;
+        if (!username || !password) {
+            setAuthError('Enter both username and password.');
+            return;
+        }
+        try {
+            const response = await fetch('http://127.0.0.1:8000/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const result = await response.json();
+            if (result.error || !result.token) {
+                setAuthError(formatAuthError(result.error));
+                return;
+            }
+            authToken = result.token;
+            showAppScreen();
+        } catch (error) {
+            console.error('Login failed:', error);
+            setAuthError('Login failed. Please try again.');
+        }
+    });
+
+    signupForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        setAuthError('');
+        const username = signupUsernameInput.value.trim();
+        const password = signupPasswordInput.value;
+        if (!username || !password) {
+            setAuthError('Enter both username and password.');
+            return;
+        }
+        try {
+            const response = await fetch('http://127.0.0.1:8000/auth/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const result = await response.json();
+            if (result.error || !result.token) {
+                setAuthError(formatAuthError(result.error));
+                return;
+            }
+            authToken = result.token;
+            showAppScreen();
+        } catch (error) {
+            console.error('Signup failed:', error);
+            setAuthError('Signup failed. Please try again.');
+        }
+    });
+
+    function resetPopupPosition(popupEl) {
+        if (!popupEl) return;
+        const content = popupEl.querySelector('.popup-content');
+        if (!content) return;
+        content.style.left = '';
+        content.style.top = '';
+        content.style.margin = '';
+        content.style.position = '';
+    }
+
+    function enablePopupDragging(popupEl) {
+        if (!popupEl) return;
+        const content = popupEl.querySelector('.popup-content');
+        if (!content) return;
+
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let startLeft = 0;
+        let startTop = 0;
+
+        function onMouseMove(event) {
+            if (!isDragging) return;
+            const dx = event.clientX - startX;
+            const dy = event.clientY - startY;
+            const nextLeft = startLeft + dx;
+            const nextTop = startTop + dy;
+            const maxLeft = window.innerWidth - content.offsetWidth - 8;
+            const maxTop = window.innerHeight - content.offsetHeight - 8;
+            content.style.left = `${Math.min(Math.max(8, nextLeft), Math.max(8, maxLeft))}px`;
+            content.style.top = `${Math.min(Math.max(8, nextTop), Math.max(8, maxTop))}px`;
+        }
+
+        function onMouseUp() {
+            if (!isDragging) return;
+            isDragging = false;
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        }
+
+        content.addEventListener('mousedown', (event) => {
+            if (event.button !== 0) return;
+            if (event.target.closest('button, input, textarea, select, a, label, .close-btn')) return;
+            const handle = event.target.closest('.popup-header, h3, .popup-content');
+            if (!handle) return;
+
+            const rect = content.getBoundingClientRect();
+            content.style.position = 'absolute';
+            content.style.margin = '0';
+            content.style.left = `${rect.left}px`;
+            content.style.top = `${rect.top}px`;
+
+            isDragging = true;
+            startX = event.clientX;
+            startY = event.clientY;
+            startLeft = rect.left;
+            startTop = rect.top;
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+    }
+
     function removeFromSelected(index) {
         selectedCards.splice(index, 1);
         renderSelectedCards();
@@ -175,7 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
             card.addEventListener('click', () => removeFromSelected(index));
             selectedCardsContainer.appendChild(card);
         });
-        updateSelectionOnServer();
+        scheduleSelectionUpdate();
     }
 
     function makeFavoriteKey(item) {
@@ -235,6 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     augmentationBtn.addEventListener('click', async (event) => {
         event.preventDefault();
+        resetPopupPosition(suggestionPopup);
         suggestionPopup.style.display = 'flex';
         await loadNewCardSuggestions();
     });
@@ -249,6 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = createCard(item);
             augmentedCardsPopupContainer.appendChild(card);
         });
+        resetPopupPosition(augmentedPopup);
         augmentedPopup.style.display = 'flex';
     }
 
@@ -284,6 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             suggestedCardsContainer.appendChild(card);
         });
+        prefetchAudio(suggestions);
     }
 
     function showToast(message, type = 'success') {
@@ -317,6 +586,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="community-card-body">
                     <strong>${card.name}</strong>
                     <span>${card.category || ''}</span>
+                    <span class="community-card-creator">${card.creator_id ? `By ${card.creator_id}` : 'By Unknown'}</span>
                 </div>
                 <div class="community-card-actions">
                     <button type="button" class="community-card-cta" data-card-id="${card.id}">
@@ -392,6 +662,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             communityDetailAudioBtn.onclick = () => playAudioUrl(card.audio);
             communityDetailCopyBtn.onclick = () => copyCommunityCard(card.id);
+            resetPopupPosition(communityDetailPopup);
             communityDetailPopup.style.display = 'flex';
         } catch (error) {
             console.error('Error opening community detail:', error);
@@ -479,6 +750,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sharePlaceInput.value = '';
         shareOccasionInput.value = '';
         shareTagsInput.value = '';
+        resetPopupPosition(communitySharePopup);
         communitySharePopup.style.display = 'flex';
     }
 
@@ -506,9 +778,14 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         try {
+            const authToken = getAuthToken();
+            const headers = { 'Content-Type': 'application/json' };
+            if (authToken) {
+                headers.Authorization = `Bearer ${authToken}`;
+            }
             const response = await fetch('http://127.0.0.1:8000/community/share', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
                 body: JSON.stringify(payload)
             });
             const result = await response.json();
@@ -526,12 +803,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setActiveView(viewName) {
+        const showSettings = viewName === 'settings';
         const showCommunity = viewName === 'community';
-        aacView.classList.toggle('active', !showCommunity);
+        const showAac = !showCommunity && !showSettings;
+        aacView.classList.toggle('active', showAac);
         communityView.classList.toggle('active', showCommunity);
-        sidebarAacBtn.classList.toggle('active', !showCommunity);
+        settingsView.classList.toggle('active', showSettings);
+        sidebarAacBtn.classList.toggle('active', showAac);
         sidebarCommunityBtn.classList.toggle('active', showCommunity);
+        sidebarSettingsBtn.classList.toggle('active', showSettings);
         document.body.classList.toggle('view-community', showCommunity);
+        document.body.classList.toggle('view-settings', showSettings);
         if (showCommunity) {
             loadCommunityResults(communitySearchInput.value.trim());
         }
@@ -547,6 +829,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sidebarCommunityBtn.addEventListener('click', () => {
         setActiveView('community');
+    });
+
+    sidebarSettingsBtn.addEventListener('click', () => {
+        setActiveView('settings');
+        refreshSettings();
+    });
+    logoutBtn.addEventListener('click', () => {
+        sidebarAacBtn.classList.remove('active');
+        sidebarCommunityBtn.classList.remove('active');
+        sidebarSettingsBtn.classList.remove('active');
+        logoutBtn.classList.add('active');
+        setTimeout(() => {
+            const confirmed = window.confirm('Are you sure you want to log out?');
+            if (!confirmed) {
+                logoutBtn.classList.remove('active');
+                return;
+            }
+            clearAuth();
+        }, 0);
+    });
+
+    settingsPasswordForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const token = getAuthToken();
+        if (!token) {
+            setSettingsMessage('Please log in again.', 'error');
+            return;
+        }
+        const currentPassword = currentPasswordInput.value;
+        const newPassword = newPasswordInput.value;
+        if (!currentPassword || !newPassword) {
+            setSettingsMessage('Enter current and new password.', 'error');
+            return;
+        }
+        try {
+            const response = await fetch('http://127.0.0.1:8000/auth/change-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ current_password: currentPassword, new_password: newPassword })
+            });
+            const result = await response.json();
+            if (result.error) {
+                setSettingsMessage(formatAuthError(result.error), 'error');
+                return;
+            }
+            currentPasswordInput.value = '';
+            newPasswordInput.value = '';
+            setSettingsMessage('Password updated.', 'success');
+        } catch (error) {
+            console.error('Password update failed:', error);
+            setSettingsMessage('Password update failed.', 'error');
+        }
     });
 
     communityDetailCloseBtn.addEventListener('click', () => {
@@ -697,11 +1034,40 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function scheduleSelectionUpdate() {
+        if (selectionUpdateTimer) {
+            clearTimeout(selectionUpdateTimer);
+        }
+        selectionUpdateTimer = setTimeout(() => {
+            selectionUpdateTimer = null;
+            updateSelectionOnServer();
+        }, 150);
+    }
+
+    function getCachedAudio(item) {
+        if (!item?.category || !item?.word) return null;
+        const key = `${item.category}|||${item.word}`;
+        let audio = audioCache.get(key);
+        if (!audio) {
+            audio = new Audio(`../aac_audios/${item.category}/${item.word}.mp3`);
+            audio.preload = 'auto';
+            audioCache.set(key, audio);
+        }
+        return audio;
+    }
+
+    function prefetchAudio(items = []) {
+        const limit = Math.min(items.length, MAX_AUDIO_PREFETCH);
+        for (let i = 0; i < limit; i += 1) {
+            getCachedAudio(items[i]);
+        }
+    }
+
     resetBtn.addEventListener('click', () => {
         selectedCards = [];
         renderSelectedCards();
         renderSuggestedCards();
-        updateSelectionOnServer();
+        scheduleSelectionUpdate();
     });
 
     let mediaRecorder;
@@ -775,5 +1141,8 @@ document.addEventListener('DOMContentLoaded', () => {
             await startRecording();
         }
     });
+
+    setAuthMode('login');
+    showAuthScreen();
 
 });

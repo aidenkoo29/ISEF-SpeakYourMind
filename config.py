@@ -18,6 +18,7 @@ ORIGINAL_AAC_LIBRARY_PATH = Path(
     os.getenv("ORIGINAL_AAC_LIBRARY_PATH", DATA_DIR / "original_aac_library.csv")
 )
 EMBEDDING_PKL_PATH = Path(os.getenv("EMBEDDING_PKL_PATH", DATA_DIR / "library_vectors.pkl"))
+USERS_DB_PATH = Path(os.getenv("USERS_DB_PATH", DATA_DIR / "users.json"))
 
 UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", BASE_DIR / "uploads"))
 

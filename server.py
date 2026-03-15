@@ -3,11 +3,11 @@ from __future__ import annotations
 import os
 import pprint
 import shutil
-from typing import List
+from typing import List, Optional
 from uuid import uuid4
 
 import pandas as pd
-from fastapi import BackgroundTasks, FastAPI, File, UploadFile
+from fastapi import BackgroundTasks, FastAPI, File, Header, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -19,6 +19,7 @@ from config import (
     ORIGINAL_AAC_LIBRARY_PATH,
     UPLOAD_DIR,
 )
+from services.auth import change_password, create_user, get_user_from_token, issue_token, verify_user
 from services.audio import create_audio, transcript
 from services.augmentation import (
     CATEGORY_ALIASES,
@@ -72,11 +73,35 @@ class CommunityCopyRequest(BaseModel):
     id: str
 
 
+class SignupRequest(BaseModel):
+    username: str
+    password: str
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+
 def _is_english_or_empty(text: str) -> bool:
     cleaned = (text or "").strip()
     if not cleaned:
         return True
     return is_english_word(cleaned)
+
+
+def _token_from_header(authorization: Optional[str]) -> Optional[str]:
+    if not authorization:
+        return None
+    prefix = "Bearer "
+    if authorization.startswith(prefix):
+        return authorization[len(prefix) :].strip()
+    return None
 
 
 app.add_middleware(
@@ -219,7 +244,7 @@ async def job_status(job_id: str):
 
 
 @app.post("/community/share")
-async def community_share(req: CommunityShareRequest):
+async def community_share(req: CommunityShareRequest, authorization: Optional[str] = Header(default=None)):
     normalized_category = CATEGORY_ALIASES.get(req.category, req.category)
     normalized_name = req.name.strip()
 
@@ -239,8 +264,50 @@ async def community_share(req: CommunityShareRequest):
     payload = req.dict()
     payload["category"] = normalized_category
     payload["name"] = normalized_name
+    token = _token_from_header(authorization)
+    user = get_user_from_token(token)
+    if user:
+        payload["creator_id"] = user
     card = share_card(payload)
     return {"card": card}
+
+
+@app.post("/auth/signup")
+async def auth_signup(req: SignupRequest):
+    user, error = create_user(req.username, req.password)
+    if error:
+        return {"error": error}
+    token = issue_token(user["username"])
+    return {"user": user, "token": token}
+
+
+@app.post("/auth/login")
+async def auth_login(req: LoginRequest):
+    if not verify_user(req.username, req.password):
+        return {"error": "invalid_credentials"}
+    token = issue_token(req.username.strip())
+    return {"user": {"username": req.username.strip()}, "token": token}
+
+
+@app.get("/auth/me")
+async def auth_me(authorization: Optional[str] = Header(default=None)):
+    token = _token_from_header(authorization)
+    user = get_user_from_token(token)
+    if not user:
+        return {"user": None}
+    return {"user": {"username": user}}
+
+
+@app.post("/auth/change-password")
+async def auth_change_password(req: ChangePasswordRequest, authorization: Optional[str] = Header(default=None)):
+    token = _token_from_header(authorization)
+    user = get_user_from_token(token)
+    if not user:
+        return {"error": "unauthorized"}
+    error = change_password(user, req.current_password, req.new_password)
+    if error:
+        return {"error": error}
+    return {"status": "ok"}
 
 
 @app.get("/community/search")
